@@ -1,0 +1,312 @@
+    [
+        {
+          "name": "Golden Gate Bridge",
+          "description": "Iconic suspension bridge offering stunning views of the bay and city. Great for photos, walking, and biking.",
+          "tags": ["landmark", "views", "outdoors", "photo opportunity"]
+        },
+        {
+          "name": "Alcatraz Island",
+          "description": "Former maximum-security prison, now a popular tourist attraction with audio tours detailing its history.",
+          "tags": ["history", "landmark", "tourist attraction", "unique experience"]
+        },
+        {
+          "name": "Fisherman's Wharf",
+          "description": "Bustling waterfront area known for seafood restaurants, street performers, souvenir shops, and views of sea lions.",
+          "tags": ["food", "tourist attraction", "shopping", "entertainment", "views"]
+        },
+        {
+          "name": "Golden Gate Park",
+          "description": "Large urban park featuring gardens, museums (de Young, California Academy of Sciences), lakes, and walking trails.",
+          "tags": ["park", "outdoors", "museums", "gardens", "relaxation"]
+        },
+        {
+          "name": "The Mission District",
+          "description": "Vibrant neighborhood known for its murals, diverse food scene (especially Mexican), and lively culture.",
+          "tags": ["food", "culture", "art", "neighborhood", "nightlife"]
+        },
+        {
+          "name": "Coit Tower",
+          "description": "Art Deco tower atop Telegraph Hill offering panoramic city views and featuring murals from the 1930s.",
+          "tags": ["landmark", "views", "history", "art", "photo opportunity"]
+        },
+        {
+          "name": "Ritual Coffee Roasters",
+          "description": "Popular coffee shop known for its high-quality, meticulously sourced beans and expert brewing methods. Several locations.",
+          "tags": ["coffee", "cafe", "food"]
+        },
+        {
+          "name": "Ferry Building Marketplace",
+          "description": "Historic ferry terminal hosting a vibrant marketplace with artisanal food vendors, restaurants, and a farmers market.",
+          "tags": ["food", "shopping", "market", "landmark"]
+        },
+        {
+          "name": "Lombard Street",
+          "description": "Famous for its steep, one-block section with eight hairpin turns, known as the 'crookedest street in the world'.",
+          "tags": ["landmark", "photo opportunity", "unique experience", "views"]
+        },
+        {
+          "name": "Palace of Fine Arts",
+          "description": "Monumental structure originally constructed for the 1915 Panama-Pacific Exposition, featuring a classical rotunda and lagoon.",
+          "tags": ["architecture", "landmark", "photo opportunity", "outdoors", "romantic"]
+        },
+        {
+          "name": "Chinatown",
+          "description": "The oldest and one of the largest Chinatowns in North America, offering authentic cuisine, unique shops, and cultural experiences.",
+          "tags": ["culture", "food", "shopping", "neighborhood", "history"]
+        },
+        {
+          "name": "Painted Ladies",
+          "description": "Row of colorful Victorian houses facing Alamo Square Park, famous for their appearance in TV shows and stunning city backdrop.",
+          "tags": ["architecture", "photo opportunity", "landmark", "views"]
+        },
+        {
+          "name": "Twin Peaks",
+          "description": "Two prominent hills offering spectacular 360-degree views of the city, bay, and surrounding areas.",
+          "tags": ["views", "outdoors", "hiking", "photo opportunity", "romantic"]
+        },
+        {
+          "name": "Exploratorium",
+          "description": "Interactive science museum with hundreds of hands-on exhibits exploring science, art, and human perception.",
+          "tags": ["museum", "family-friendly", "educational", "interactive", "science"]
+        },
+        {
+          "name": "Lands End",
+          "description": "Rugged coastal trail offering dramatic views of the Golden Gate Bridge, Marin Headlands, and shipwrecks visible at low tide.",
+          "tags": ["hiking", "outdoors", "views", "nature", "photo opportunity"]
+        },
+        {
+          "name": "Ghirardelli Square",
+          "description": "Historic chocolate factory converted into a retail and dining complex, famous for its chocolate and ice cream.",
+          "tags": ["food", "shopping", "dessert", "history", "tourist attraction"]
+        },
+        {
+          "name": "Japanese Tea Garden",
+          "description": "Oldest public Japanese garden in the US, featuring traditional elements like pagodas, koi ponds, and a tea house.",
+          "tags": ["gardens", "culture", "relaxation", "outdoors", "photo opportunity"]
+        },
+        {
+          "name": "Dolores Park",
+          "description": "Popular urban park with stunning city views, large grassy areas, and a vibrant social scene, especially on weekends.",
+          "tags": ["park", "outdoors", "views", "social", "relaxation"]
+        },
+        {
+          "name": "California Academy of Sciences",
+          "description": "Natural history museum featuring an aquarium, planetarium, rainforest dome, and living roof in Golden Gate Park.",
+          "tags": ["museum", "science", "family-friendly", "educational", "nature"]
+        },
+        {
+          "name": "de Young Museum",
+          "description": "Fine arts museum in Golden Gate Park with a distinctive copper facade and observation tower offering panoramic views.",
+          "tags": ["museum", "art", "culture", "architecture", "views"]
+        },
+        {
+          "name": "Blue Bottle Coffee",
+          "description": "Renowned specialty coffee roaster known for pour-over coffee and minimalist cafes across the city.",
+          "tags": ["coffee", "cafe", "food", "trendy"]
+        },
+        {
+          "name": "Tartine Bakery",
+          "description": "Acclaimed bakery in the Mission District famous for its artisanal bread, morning buns, and other pastries.",
+          "tags": ["food", "bakery", "dessert", "cafe", "local favorite"]
+        },
+        {
+          "name": "Muir Woods National Monument",
+          "description": "Ancient coastal redwood forest just north of San Francisco with towering trees and serene hiking trails.",
+          "tags": ["nature", "hiking", "outdoors", "day trip", "forest"]
+        },
+        {
+          "name": "Baker Beach",
+          "description": "Scenic beach with stunning views of the Golden Gate Bridge and Marin Headlands, popular for sunsets.",
+          "tags": ["beach", "outdoors", "views", "photo opportunity", "relaxation"]
+        },
+        {
+          "name": "The Castro",
+          "description": "Historic LGBTQ+ neighborhood known for its vibrant nightlife, cultural landmarks, and annual pride celebrations.",
+          "tags": ["culture", "nightlife", "history", "neighborhood", "entertainment"]
+        },
+        {
+          "name": "Haight-Ashbury",
+          "description": "Famous neighborhood known as the birthplace of the 1960s counterculture movement, featuring vintage shops and colorful Victorian houses.",
+          "tags": ["history", "shopping", "culture", "neighborhood", "architecture"]
+        },
+        {
+          "name": "Sausalito",
+          "description": "Charming waterfront town across the Golden Gate Bridge with art galleries, houseboats, and bay views.",
+          "tags": ["day trip", "views", "shopping", "art", "food"]
+        },
+        {
+          "name": "Angel Island State Park",
+          "description": "Island in the bay offering hiking trails, historical sites, and panoramic views of the San Francisco skyline.",
+          "tags": ["hiking", "history", "views", "outdoors", "day trip"]
+        },
+        {
+          "name": "Presidio",
+          "description": "Former military post turned national park with forests, beaches, historic buildings, and the Walt Disney Family Museum.",
+          "tags": ["park", "history", "outdoors", "museum", "nature"]
+        },
+        {
+          "name": "Pier 39",
+          "description": "Popular tourist destination with shops, restaurants, street performers, and a colony of sea lions.",
+          "tags": ["tourist attraction", "shopping", "food", "entertainment", "views"]
+        },
+        {
+          "name": "Philz Coffee",
+          "description": "San Francisco coffee chain known for its customized, hand-poured coffee blends and relaxed atmosphere.",
+          "tags": ["coffee", "cafe", "local favorite", "food"]
+        },
+        {
+          "name": "Sutro Baths",
+          "description": "Ruins of a late 19th-century bathhouse complex on the western shore, offering dramatic ocean views and hiking trails.",
+          "tags": ["history", "ruins", "views", "hiking", "photo opportunity"]
+        },
+        {
+          "name": "North Beach",
+          "description": "Historic Italian district known for its restaurants, cafes, beatnik history, and vibrant nightlife.",
+          "tags": ["food", "culture", "nightlife", "history", "neighborhood"]
+        },
+        {
+          "name": "Legion of Honor",
+          "description": "Fine arts museum housed in a neoclassical building overlooking the Golden Gate Bridge, featuring European masterpieces.",
+          "tags": ["museum", "art", "architecture", "views", "culture"]
+        },
+        {
+          "name": "Nob Hill",
+          "description": "Upscale neighborhood featuring luxury hotels, Grace Cathedral, and cable car lines with spectacular city views.",
+          "tags": ["neighborhood", "architecture", "views", "history", "luxury"]
+        },
+        {
+          "name": "Ocean Beach",
+          "description": "Long, wide beach along the city's western edge popular with surfers, dog walkers, and bonfire enthusiasts.",
+          "tags": ["beach", "outdoors", "surfing", "sunset", "relaxation"]
+        },
+        {
+          "name": "Conservatory of Flowers",
+          "description": "Victorian greenhouse in Golden Gate Park housing a collection of rare and exotic plants.",
+          "tags": ["gardens", "architecture", "nature", "photo opportunity", "educational"]
+        },
+        {
+          "name": "Musée Mécanique",
+          "description": "Unique museum featuring a collection of antique arcade machines and mechanical musical instruments that visitors can play.",
+          "tags": ["museum", "entertainment", "unique experience", "family-friendly", "nostalgic"]
+        },
+        {
+          "name": "Sightglass Coffee",
+          "description": "Independent coffee roaster with industrial-chic cafes known for single-origin beans and meticulous brewing methods.",
+          "tags": ["coffee", "cafe", "trendy", "food"]
+        },
+        {
+          "name": "Salesforce Park",
+          "description": "Elevated urban park above the Salesforce Transit Center featuring gardens, walking paths, and public art.",
+          "tags": ["park", "architecture", "modern", "outdoors", "relaxation"]
+        },
+        {
+          "name": "The Buena Vista Cafe",
+          "description": "Historic cafe famous for introducing Irish Coffee to America, located near Fisherman's Wharf.",
+          "tags": ["food", "drinks", "history", "cafe", "iconic"]
+        },
+        {
+          "name": "Crissy Field",
+          "description": "Former airfield transformed into a recreational area with beaches, picnic areas, and stunning Golden Gate Bridge views.",
+          "tags": ["outdoors", "views", "beach", "recreation", "photo opportunity"]
+        },
+        {
+          "name": "Japantown",
+          "description": "Cultural district featuring Japanese restaurants, shops, the Peace Pagoda, and seasonal festivals.",
+          "tags": ["culture", "food", "shopping", "neighborhood", "architecture"]
+        },
+        {
+          "name": "Dandelion Chocolate",
+          "description": "Bean-to-bar chocolate factory and cafe in the Mission District offering tours, classes, and decadent hot chocolate.",
+          "tags": ["food", "dessert", "tours", "unique experience", "gifts"]
+        },
+        {
+          "name": "Bernal Heights Park",
+          "description": "Hilltop park offering panoramic city views, dog-friendly trails, and a relaxed neighborhood vibe.",
+          "tags": ["views", "outdoors", "hiking", "local favorite", "dog-friendly"]
+        },
+        {
+          "name": "The Fillmore",
+          "description": "Historic music venue that played a significant role in the psychedelic music scene of the 1960s, still hosting concerts today.",
+          "tags": ["music", "entertainment", "history", "nightlife", "culture"]
+        },
+        {
+          "name": "Andytown Coffee Roasters",
+          "description": "Neighborhood coffee shop known for its Snowy Plover drink (espresso, sparkling water, and whipped cream) and house-roasted beans.",
+          "tags": ["coffee", "cafe", "local favorite", "food"]
+        },
+        {
+          "name": "Alamo Square Park",
+          "description": "Urban park famous for its view of the Painted Ladies Victorian houses with the downtown skyline in the background.",
+          "tags": ["park", "views", "photo opportunity", "outdoors", "relaxation"]
+        },
+        {
+          "name": "Anchor Brewing Company",
+          "description": "America's oldest craft brewery offering tours and tastings of its traditional steam beer and other brews.",
+          "tags": ["beer", "tours", "history", "drinks", "local favorite"]
+        },
+        {
+          "name": "San Francisco Museum of Modern Art (SFMOMA)",
+          "description": "Renowned modern art museum with an impressive collection spanning painting, sculpture, photography, and digital media.",
+          "tags": ["museum", "art", "culture", "architecture", "modern"]
+        },
+        {
+          "name": "Bi-Rite Creamery",
+          "description": "Beloved ice cream shop known for small-batch, locally sourced flavors like salted caramel and honey lavender.",
+          "tags": ["food", "dessert", "local favorite", "ice cream"]
+        },
+        {
+          "name": "Corona Heights Park",
+          "description": "Hilltop park featuring dramatic rock outcroppings and panoramic views of the city and bay.",
+          "tags": ["views", "hiking", "outdoors", "photo opportunity", "local favorite"]
+        },
+        {
+          "name": "The Interval at Long Now",
+          "description": "Unique bar, cafe, and museum showcasing mechanical wonders and artifacts related to long-term thinking.",
+          "tags": ["drinks", "unique experience", "museum", "intellectual", "date spot"]
+        },
+        {
+          "name": "Fort Point",
+          "description": "Civil War-era fortress located directly beneath the Golden Gate Bridge, offering historical exhibits and unique bridge views.",
+          "tags": ["history", "architecture", "views", "photo opportunity", "educational"]
+        },
+        {
+          "name": "Four Barrel Coffee",
+          "description": "Hip coffee roaster in the Mission with a vintage aesthetic, known for single-origin beans and vinyl records playing in-store.",
+          "tags": ["coffee", "cafe", "trendy", "hipster", "food"]
+        },
+        {
+          "name": "Yerba Buena Gardens",
+          "description": "Urban oasis in downtown featuring landscaped lawns, public art, museums, and the historic carousel.",
+          "tags": ["park", "art", "culture", "relaxation", "family-friendly"]
+        },
+        {
+          "name": "The Tonga Room & Hurricane Bar",
+          "description": "Iconic tiki bar in the Fairmont Hotel featuring tropical drinks, Asian cuisine, and indoor rainstorms over a lagoon.",
+          "tags": ["drinks", "unique experience", "nightlife", "food", "nostalgic"]
+        },
+        {
+          "name": "Seward Street Slides",
+          "description": "Concrete slides built into a hillside park where visitors can slide down on cardboard pieces.",
+          "tags": ["unique experience", "family-friendly", "outdoors", "local favorite", "free"]
+        },
+        {
+          "name": "Boudin Bakery",
+          "description": "San Francisco's oldest continuously operating business, famous for its sourdough bread made with a Gold Rush-era starter.",
+          "tags": ["food", "bakery", "history", "local favorite", "iconic"]
+        },
+        {
+          "name": "16th Avenue Tiled Steps",
+          "description": "Community art project featuring a sea-to-stars themed mosaic stairway leading to stunning city views.",
+          "tags": ["art", "unique experience", "views", "photo opportunity", "outdoors"]
+        },
+        {
+          "name": "The Wave Organ",
+          "description": "Acoustic sculpture on the bay that amplifies the sounds of waves through a series of pipes and chambers.",
+          "tags": ["art", "unique experience", "outdoors", "views", "free"]
+        },
+        {
+          "name": "Trouble Coffee",
+          "description": "Tiny, quirky coffee shop credited with starting the artisanal toast trend, known for cinnamon toast and coconuts.",
+          "tags": ["coffee", "cafe", "unique experience", "food", "local favorite"]
+        }
+      ]
