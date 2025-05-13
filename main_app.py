@@ -22,10 +22,12 @@ from llama_index.core import VectorStoreIndex, Document # Need Document for manu
 from llama_index.vector_stores.weaviate import WeaviateVectorStore
 from dotenv import load_dotenv
 from crewai import Agent, Task, Crew, Process
-from crewai.tools import BaseTool # Correct import needed
+from crewai.tools import BaseTool
 import weaviate.classes.config as wvc # For schema definition if needed
 import comet_ml # Import Comet
 from opik import track
+import time # Import time for potential delays
+from typing import Any
 
 # --- Environment Loading & Constants ---
 load_dotenv()
@@ -92,7 +94,6 @@ def ensure_location_schema(client):
                     vectorizer_config=wvc.Configure.Vectorizer.text2vec_openai(
                         # Use a known available model name
                         model="text-embedding-3-small", # CHANGED FROM ada-002
-                        vectorize_collection_name=True
                     ),
                     properties=[
                         wvc.Property(name="name", data_type=wvc.DataType.TEXT),
@@ -105,86 +106,121 @@ def ensure_location_schema(client):
                  print(f"Warning: Failed to create collection '{COLLECTION_NAME}': {e}. Proceeding might fail.")
 
 def scrape_and_ingest_wikipedia(client):
-    """Scrapes Wikipedia category, extracts data, and ingests into Weaviate."""
-    print(f"Attempting to scrape Wikipedia category: {WIKI_CATEGORY_URL}")
+    """Scrapes Wikipedia category AND its subcategories (1 level deep), extracts data, and ingests into Weaviate."""
+    print(f"Attempting to scrape Wikipedia category and subcategories from: {WIKI_CATEGORY_URL}")
+    attraction_urls = set() # Use a set to automatically handle duplicates
+    categories_to_visit = [WIKI_CATEGORY_URL]
+    visited_categories = set()
+
+    # --- Step 1: Collect URLs from Category and Subcategories --- 
+    print("Collecting attraction URLs...")
+    while categories_to_visit:
+        current_category_url = categories_to_visit.pop(0)
+        if current_category_url in visited_categories:
+            continue
+        visited_categories.add(current_category_url)
+        print(f"  Visiting category page: {current_category_url}")
+
+        try:
+            response = requests.get(current_category_url, timeout=15)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+
+            # Find direct attraction links on this page
+            pages_div = soup.find('div', {'id': 'mw-pages'})
+            if pages_div:
+                links = pages_div.find_all('a')
+                for link in links:
+                    href = link.get('href', '')
+                    if href.startswith('/wiki/') and ':' not in href:
+                        attraction_urls.add(f"https://en.wikipedia.org{href}")
+
+            # Find subcategory links (only if we are on the *main* category page)
+            if current_category_url == WIKI_CATEGORY_URL:
+                subcat_div = soup.find('div', {'id': 'mw-subcategories'})
+                if subcat_div:
+                    links = subcat_div.find_all('a')
+                    for link in links:
+                        href = link.get('href', '')
+                        # Add valid subcategory URLs to visit
+                        if href.startswith('/wiki/Category:'):
+                             subcat_url = f"https://en.wikipedia.org{href}"
+                             if subcat_url not in visited_categories:
+                                 print(f"    Adding subcategory to visit: {subcat_url}")
+                                 categories_to_visit.append(subcat_url)
+            
+            # Optional: Brief delay to avoid overwhelming Wikipedia
+            time.sleep(0.1) 
+
+        except requests.exceptions.RequestException as e_cat:
+            print(f"Warning: Failed to fetch category/subcategory page {current_category_url}: {e_cat}")
+        except Exception as e_outer:
+            print(f"Warning: Unexpected error processing category page {current_category_url}: {e_outer}")
+
+    print(f"Collected {len(attraction_urls)} unique attraction URLs.")
+
+    # --- Step 2: Scrape Individual Attraction Pages --- 
     locations_to_ingest = []
     scraped_count = 0
     ingested_count = 0
+    urls_to_scrape = list(attraction_urls) # Convert set to list for iteration
 
-    try:
-        response = requests.get(WIKI_CATEGORY_URL, timeout=15)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-        category_links_div = soup.find('div', {'id': 'mw-pages'})
-        if not category_links_div:
-            print("Warning: Could not find the category links section ('mw-pages') on the Wikipedia page.")
-            return 0
+    for page_url in urls_to_scrape:
+        if scraped_count >= SCRAPE_LIMIT:
+            print(f"Reached scrape limit of {SCRAPE_LIMIT}.")
+            break
+        
+        # Extract title from URL (simple version)
+        title = page_url.split('/wiki/')[-1].replace('_', ' ') 
+        # Attempt to decode URL encoding if present (e.g., %27)
+        try: 
+            title = up.unquote(title)
+        except Exception:
+            pass # Ignore decoding errors
 
-        links = category_links_div.find_all('a')
-        print(f"Found {len(links)} potential links in category.")
+        print(f"  Scraping: {title} ({page_url})")
+        scraped_count += 1
+        try:
+            page_response = requests.get(page_url, timeout=15)
+            page_response.raise_for_status()
+            page_soup = BeautifulSoup(page_response.content, 'html.parser')
 
-        for link in links:
-            if scraped_count >= SCRAPE_LIMIT:
-                print(f"Reached scrape limit of {SCRAPE_LIMIT}.")
-                break
+            # --- Description Extraction (Using previous robust method) ---
+            description = ""
+            content_parser_output = page_soup.select_one('#mw-content-text .mw-parser-output')
+            if content_parser_output:
+                paragraphs = content_parser_output.find_all('p')
+                for p in paragraphs:
+                    p_text = p.get_text(strip=True)
+                    if len(p_text) > 50 and not p_text.startswith(('Coordinates:', '(')):
+                        description = p_text
+                        if len(description) > 300:
+                            description = description[:300] + "..."
+                        break
+            # --- End Description Extraction ---
 
-            href = link.get('href', '')
-            title = link.get('title', '')
+            if description:
+                 locations_to_ingest.append({
+                    "name": title,
+                    "description": description,
+                    "source": page_url
+                 })
+                 print(f"    Extracted: {description[:70]}...")
+            else:
+                print(f"    Warning: Could not extract a suitable descriptive paragraph for {title}")
+            
+            # Optional delay
+            time.sleep(0.1)
 
-            if href.startswith('/wiki/') and ':' not in href and title:
-                page_url = f"https://en.wikipedia.org{href}"
-                print(f"  Scraping: {title} ({page_url})")
-                scraped_count += 1
-                try:
-                    page_response = requests.get(page_url, timeout=15)
-                    page_response.raise_for_status()
-                    page_soup = BeautifulSoup(page_response.content, 'html.parser')
+        except requests.exceptions.RequestException as e_page:
+            print(f"    Warning: Failed to fetch/parse page {page_url}: {e_page}")
+        except Exception as e_inner:
+             print(f"    Warning: Unexpected error processing {page_url}: {e_inner}")
 
-                    # --- More Robust Description Extraction ---
-                    description = ""
-                    content_parser_output = page_soup.select_one('#mw-content-text .mw-parser-output')
-                    if content_parser_output:
-                        # Find ALL paragraphs within the content area
-                        paragraphs = content_parser_output.find_all('p') # Removed recursive=False
-                        for p in paragraphs:
-                            p_text = p.get_text(strip=True)
-                            # Find the first paragraph that looks like real content
-                            if len(p_text) > 50 and not p_text.startswith(('Coordinates:', '(')):
-                                description = p_text
-                                # Limit length
-                                if len(description) > 300:
-                                    description = description[:300] + "..."
-                                break # Stop after finding the first good paragraph
-                    # --- End More Robust Extraction ---
-
-                    if description:
-                         locations_to_ingest.append({
-                            "name": title,
-                            "description": description,
-                            "source": page_url
-                         })
-                         print(f"    Extracted: {description[:70]}...")
-                    else:
-                        # Use a more specific warning
-                        print(f"    Warning: Could not extract a suitable descriptive paragraph for {title}")
-
-                except requests.exceptions.RequestException as e_page:
-                    print(f"    Warning: Failed to fetch/parse page {page_url}: {e_page}")
-                except Exception as e_inner:
-                     print(f"    Warning: Unexpected error processing {page_url}: {e_inner}")
-
-
-    except requests.exceptions.RequestException as e_cat:
-        print(f"Warning: Failed to fetch Wikipedia category page: {e_cat}")
-        return 0
-    except Exception as e_outer:
-        print(f"Warning: Unexpected error during scraping setup: {e_outer}")
-        return 0
-
-    # --- Ingest Data using Native Weaviate Batch Import ---
+    # --- Step 3: Ingest Data --- (Logic remains the same)
     if locations_to_ingest:
         print(f"\n--- Starting Weaviate Batch Import for {len(locations_to_ingest)} scraped locations ---")
-        ensure_location_schema(client) # Make sure schema exists
+        ensure_location_schema(client) # Recreates schema if it was deleted
         try:
             location_collection = client.collections.get(COLLECTION_NAME)
             with location_collection.batch.dynamic() as batch:
@@ -199,49 +235,99 @@ def scrape_and_ingest_wikipedia(client):
                          print(f"  Added {i + 1} objects to Weaviate batch...")
 
             print("Batch import process finished.")
-            if location_collection.batch.num_errors() > 0:
-                 print(f"Warning: Errors occurred during Weaviate batch import: {location_collection.batch.errors}")
-            ingested_count = len(locations_to_ingest) # Consider successful additions
+            # Attempt error check if method becomes available in future client versions
+            # if hasattr(location_collection.batch, 'num_errors') and callable(location_collection.batch.num_errors):
+            #     if location_collection.batch.num_errors() > 0:
+            #         print(f"Warning: Errors occurred during Weaviate batch import: {location_collection.batch.errors}")
+            # else:
+            #     print("(Could not check for batch errors automatically)")
+            ingested_count = len(locations_to_ingest)
 
         except Exception as e_batch:
             print(f"Warning: Error during Weaviate batch import: {e_batch}")
-            ingested_count = 0 # Reset count on failure
-
+            ingested_count = 0
     else:
         print("No valid locations extracted from Wikipedia to ingest.")
 
     return ingested_count
 
-# --- CrewAI Tool Definition ---
+# --- CrewAI Tools ---
 class LocationSearchTool(BaseTool):
-    name: str = "Location Search Tool"
+    name: str = "San Francisco Location Search"
     description: str = ("Searches a database of San Francisco tourist attractions based on user interests. "
                         "Input should be a comma-separated string of interests (e.g., 'historic landmarks, good views, art'). "
-                        "Returns a raw list of matching locations and their descriptions, or a specific message if none found.")
-    query_engine: object # Store query engine instance
+                        "Returns a multi-line string, where each item found includes its Name, Description, Source, and Relevance Score. "
+                        "If no relevant items are found, it returns 'NO_RESULTS_FOUND' or the LLM's direct assessment.")
+    query_engine: Any = None
 
     def _run(self, interests: str) -> str:
-        """Use the LlamaIndex query engine to find relevant locations."""
         print(f"\n>> LocationSearchTool searching for: {interests}")
         if not self.query_engine:
              return "Error: Query engine not initialized."
         try:
-            response = self.query_engine.query(interests)
-            response_text = str(response).strip()
-            print(f">> LocationSearchTool raw response: {response_text[:100]}...") # Log snippet
+            # The query_engine.query() call itself performs retrieval and then synthesis.
+            # We are interested in the source_nodes it retrieved.
+            response_obj = self.query_engine.query(interests)
 
-            # Check if the response indicates no results were found
-            # LlamaIndex might return an empty string or a default message.
-            # Adapt this check based on observed behavior for empty results.
-            if not response_text or "empty response" in response_text.lower() or "no relevant" in response_text.lower():
-                 print(">> LocationSearchTool concluded: No relevant results.")
-                 return "NO_RESULTS_FOUND" # Return a specific marker
+            retrieved_data_parts = []
+            if hasattr(response_obj, 'source_nodes') and response_obj.source_nodes:
+                print(f"  >> DIAGNOSTIC: Raw nodes retrieved by LlamaIndex (query_engine uses these for its synthesis):")
+                for i, node_with_score in enumerate(response_obj.source_nodes):
+                    try:
+                        node_text = node_with_score.node.get_content() # Should be 'description' due to text_key
+                        node_metadata = node_with_score.node.metadata or {}
+                        # Access name and source within the nested 'properties' dict
+                        node_properties = node_metadata.get('properties', {}) # Get the inner dict or empty if missing
+                        node_name = node_properties.get('name', 'Unknown Location')
+                        node_source = node_properties.get('source', 'N/A')
+                        node_score = node_with_score.score if node_with_score.score is not None else 0.0
 
-            print(f">> LocationSearchTool found: {response_text[:100]}...")
-            return response_text # Return the raw response text
+                        # Prepare a structured string for each item
+                        item_detail = (
+                            f"Item {i+1}:\n"
+                            f"  Name: {node_name}\n"
+                            f"  Description: {node_text}\n"
+                            f"  Source: {node_source}\n"
+                            f"  Relevance Score: {node_score:.4f}"
+                        )
+                        retrieved_data_parts.append(item_detail)
+                        cleaned_text = node_text[:60].replace('\n', ' ') 
+                        # Print full metadata for debugging
+                        print(f"Node {i+1}: Name='{node_name}', Score={node_score:.4f}, Text='{cleaned_text}...', METADATA: {node_metadata}")
+                    except Exception as e:
+                        print(f"Node {i+1}: Error extracting details: {e}")
+                        # Fallback if node structure is unexpected
+                        try:
+                            raw_content = node_with_score.node.get_content()
+                            if raw_content:
+                                retrieved_data_parts.append(f"Item {i+1} (fallback):\n  Content: {raw_content}")
+                        except Exception as e_fallback:
+                             print(f"    Node {i+1}: Error getting fallback content: {e_fallback}")
+
+
+            if not retrieved_data_parts:
+                # If no source nodes, or failed to extract from them, use the query engine's original synthesized response
+                # or indicate no results if that synthesis was also empty.
+                synthesized_response = str(response_obj).strip()
+                print(f"  >> LocationSearchTool: No usable raw nodes extracted. Using synthesized response from query engine: '{synthesized_response[:100]}...'")
+                if not synthesized_response or "empty response" in synthesized_response.lower() or \
+                   "no relevant" in synthesized_response.lower() or \
+                   "does not directly relate" in synthesized_response.lower() or \
+                   "no information provided" in synthesized_response.lower(): # Added common LLM phrase
+                    return "NO_RESULTS_FOUND" # General "not found" marker
+                return synthesized_response # Return the original synthesis
+
+            # Concatenate all item details
+            final_output = "\n\n---\n\n".join(retrieved_data_parts)
+            print(f">> LocationSearchTool returning {len(retrieved_data_parts)} concatenated raw items. Total length: {len(final_output)}")
+            return final_output
+
         except Exception as e:
-            print(f"Error during LocationSearchTool query: {e}")
-            return f"Error searching for locations: {e}"
+            print(f"Error during LocationSearchTool processing: {e}")
+            # Log the full error for debugging
+            import traceback
+            traceback.print_exc()
+            return f"Error searching for locations: Critical tool failure - {e}"
 
 # --- Main Execution Logic ---
 if __name__ == "__main__":
@@ -266,9 +352,13 @@ if __name__ == "__main__":
 
     # --- Set up LlamaIndex for QUERYING ---
     print(f"\nInitializing LlamaIndex VectorStore for collection: {COLLECTION_NAME}")
-    vector_store = WeaviateVectorStore(weaviate_client=client, index_name=COLLECTION_NAME)
-    print("Creating LlamaIndex VectorStoreIndex from existing Weaviate data...")
     try:
+        vector_store = WeaviateVectorStore(
+            weaviate_client=client, 
+            index_name=COLLECTION_NAME, 
+            text_key="description"
+        )
+        print("Creating LlamaIndex VectorStoreIndex from existing Weaviate data...")
         index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
         print("Creating LlamaIndex Query Engine...")
         # Increase similarity_top_k to give Researcher more options
@@ -359,25 +449,23 @@ if __name__ == "__main__":
     else:
         final_itinerary_str = final_itinerary
 
-    # Update regex to capture name on the line after the emoji
-    # The [^\n]+ part captures one or more characters that are NOT a newline.
-    locations_found = re.findall(r'🗺️\s*([^\n]+)', final_itinerary_str)
+    # Update regex to capture only the name after the emoji, stopping at a colon or newline
+    # [^:\n]+ captures one or more characters that are NOT a colon or a newline.
+    locations_found = re.findall(r'🗺️\s*([^:\n]+)', final_itinerary_str)
     results_returned = len(locations_found)
     print(final_itinerary_str) # Print the planner's output string
 
     if locations_found:
         print("\n--- Map Links ---")
         for name in locations_found:
-            name = name.strip().rstrip('.') # Clean up name
-            # Further clean up potential trailing explanations from the planner
-            name = name.split(' - ')[0].split(', which')[0].split(' because')[0].strip()
+            name = name.strip() # Clean up whitespace
             if name: # Avoid empty strings
                 map_url = f"https://maps.google.com/?q={up.quote(name + ', San Francisco, CA')}"
                 print(f"📍 {name} → {map_url}")
     elif "could not find" in final_itinerary_str.lower() or "no specific recommendations" in final_itinerary_str.lower():
-         print("(No specific locations found to generate map links)") # Handle apology case
+         print("\n(No specific locations found to generate map links)") # Handle apology case
     else:
-        print("(Could not extract specific locations to generate map links)")
+        print("\n(Could not extract specific locations to generate map links)")
 
 
     # c) Log metrics to Comet
